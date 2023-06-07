@@ -13,4 +13,4 @@
 <br>
 搭建即可，不会搭建的可以联系付费搭建
 <br>
-<font style=color=red>vx：kf10501（备注来意）</font>
+<font style="color=red">vx：kf10501（备注来意）</font>
