@@ -1,0 +1,68 @@
+body{
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+    list-style-type: none;
+}
+.back .user{
+    margin-top: 80px;
+    display: block;
+    height: auto;
+    padding: 10px;
+}
+.back .user .user-title{
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.back .user .user-title span{
+    color: black;
+    font-size: 14px;
+    padding: 10px;
+}
+.back .user .user-title span i{
+    margin: 0 5px;
+    color: #2196f3;
+}
+.back .user .user-title span:nth-child(2){
+    flex: 1 1 auto;
+}
+.back .user .user-title span:nth-child(2) i{
+    color: #f44336;
+}
+.back .user .user-title a{
+    padding: 10px 40px;
+    background-color:  rgba(237, 241, 244, 255);
+    border-radius: 10px;
+    color: #9e9e9e;
+    font-size: 14px;
+    margin-right: 10px;
+}
+.back .user .user-title a i{
+    margin: 0 5px;
+}
+.back .user .table td button{
+    color: #f44336;
+    background-color: #fff;
+    border: 0;
+}
+.back .user .table td button:nth-child(1){
+    color: #4caf50;
+}
+
+.back .user .user-title a:hover{
+    background-color: #e3f2fd;
+}
+
+@media(max-width:440px){
+    .back .user .user-title a{
+        padding: 6px 10px;
+        font-size: 10px;
+    }
+    .back .user .user-title span{
+        font-size: 10px;
+    }
+    .back .user .user-title span{
+        padding: 5px;
+    }
+}

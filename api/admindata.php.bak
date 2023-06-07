@@ -1,0 +1,730 @@
+<?php
+header('Content-type:text/json;charset=utf-8');
+require "../data/config.php";
+preg_match('/(http:\/\/|https:\/\/)(.*?)\//',$_SERVER["HTTP_REFERER"],$host);
+if($host[2] != $_SERVER["HTTP_HOST"]){
+	die("非法请求");
+}
+
+$data = file_get_contents("php://input");
+$data = json_decode($data,true);
+$login_data = $data["login_data"];
+
+if(!isset($login_data)){
+	die(json(array("code"=>211,"msg"=>"非法请求")));
+}else if(!isset($login_data["username"]) && !isset($login_data["password"])){
+	die(json(array("code"=>212,"msg"=>"非法请求")));
+}else if(empty($login_data["username"]) && empty($login_data["password"])){
+	die(json(array("code"=>213,"msg"=>"非法请求")));
+}else{
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$sql = "select * from app_admin where username='".daddslashes($login_data["username"])."';";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	$conn->close();
+	
+	if($row["password"] != $login_data["password"]){
+		die(json(array("code"=>214,"msg"=>"密码不正确")));
+	}
+
+}
+
+if(isset($_GET['add_app'])){
+	$appname = $data["appname"];
+	$appsize = $data["appsize"];
+	$applogo = $data["applogo"];
+	$appsort = $data["appsort"];
+	$appimg1 = $data["appimg1"];
+	$appimg2 = $data["appimg2"];
+	$appimg3 = $data["appimg3"];
+	$appurl = $data["appurl"];
+	$appintro = $data["appintro"];
+	$appvipstatus = $data["app_vip_status"];
+
+	if($data == null){
+		die(json(array("code"=>201,"msg"=>"非法请求")));
+	}else if($appname == null){
+		die(json(array("code"=>202,"msg"=>"请输入应用名称")));
+	}else if($appsize == null){
+		die(json(array("code"=>203,"msg"=>"请输入应用大小")));
+	}else if($applogo == null){
+		die(json(array("code"=>204,"msg"=>"请输入应用LOGO")));
+	}else if($appsort == null){
+		die(json(array("code"=>205,"msg"=>"请输入选择分类")));
+	}else if($appurl == null){
+		die(json(array("code"=>209,"msg"=>"请输入应用下载链接")));
+	}else if($appintro == null){
+		die(json(array("code"=>210,"msg"=>"请输入应用介绍")));
+	}else if($appvipstatus == null){
+		die(json(array("code"=>211,"msg"=>"请选择收费状态")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$time = date('Y-m-d H:i:s');
+	$sql = "INSERT INTO app_list (appname,appsize,applogo,appsort,appimg1,appimg2,appimg3,appintro,app_download_url,add_time,app_vip_status) VALUES ('{$appname}','{$appsize}','{$applogo}','{$appsort}','{$appimg1}','{$appimg2}','{$appimg3}','{$appintro}','{$appurl}','{$time}','{$appvipstatus}')";
+	if($conn->query($sql)){
+		echo json(array("code"=>200,"msg"=>"添加应用成功"));
+	}else{
+		echo json(array("code"=>212,"msg"=>"添加应用失败"));
+	}
+	$conn->close();
+}else if(isset($_GET['modify_app_data'])){
+	$appname = $data["appname"];
+	$appsize = $data["appsize"];
+	$applogo = $data["applogo"];
+	$appsort = $data["appsort"];
+	$appimg1 = $data["appimg1"];
+	$appimg2 = $data["appimg2"];
+	$appimg3 = $data["appimg3"];
+	$appurl = $data["appurl"];
+	$appintro = $data["appintro"];
+	$appvipstatus = $data["app_vip_status"];
+	$appid = $data["app_id"];
+
+	if($data == null){
+		die(json(array("code"=>201,"msg"=>"非法请求")));
+	}else if($appname == null){
+		die(json(array("code"=>202,"msg"=>"请输入应用名称")));
+	}else if($appsize == null){
+		die(json(array("code"=>203,"msg"=>"请输入应用大小")));
+	}else if($applogo == null){
+		die(json(array("code"=>204,"msg"=>"请输入应用LOGO")));
+	}else if($appsort == null){
+		die(json(array("code"=>205,"msg"=>"请输入选择分类")));
+	}else if($appurl == null){
+		die(json(array("code"=>209,"msg"=>"请输入应用下载链接")));
+	}else if($appintro == null){
+		die(json(array("code"=>210,"msg"=>"请输入应用介绍")));
+	}else if($appvipstatus == null){
+		die(json(array("code"=>211,"msg"=>"请选择收费状态")));
+	}else if($appid == null){
+		die(json(array("code"=>212,"msg"=>"请输入应用id")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$time = date('Y-m-d H:i:s');
+	$sql = "UPDATE app_list SET appname='{$appname}',appsize='{$appsize}',applogo='{$applogo}',appsort='{$appsort}',appimg1='{$appimg1}',appimg2='{$appimg2}',appimg3='{$appimg3}',appintro='{$appintro}',app_download_url='{$appurl}',app_vip_status='{$appvipstatus}' where id='{$appid}'";
+	if($conn->query($sql)){
+		echo json(array("code"=>200,"msg"=>"修改成功"));
+	}else{
+		echo json(array("code"=>213,"msg"=>"修改失败"));
+	}
+	$conn->close();
+}else if(isset($_GET['modify_km_data'])){
+	$appname = $data["appname"];
+	$appsize = $data["appsize"];
+	$appurl = $data["appurl"];
+	$appintro = $data["appintro"];
+	$appvipstatus = $data["app_vip_status"];
+	$appid = $data["app_id"];
+
+	if($data == null){
+		die(json(array("code"=>201,"msg"=>"非法请求")));
+	}else if($appname == null){
+		die(json(array("code"=>202,"msg"=>"请输入卡密内容")));
+	}else if($appsize == null){
+		die(json(array("code"=>203,"msg"=>"请输入卡密有效期")));
+	}else if($appurl == null){
+		die(json(array("code"=>209,"msg"=>"请输入卡密是否使用")));
+	}else if($appid == null){
+		die(json(array("code"=>212,"msg"=>"请输入卡密id")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	//$time = date('Y-m-d H:i:s');
+	$sql = "UPDATE app_kami SET kami='{$appname}',time='{$appsize}',cs='{$appurl}' where id='{$appid}'";
+	if($conn->query($sql)){
+		echo json(array("code"=>200,"msg"=>"修改成功"));
+	}else{
+		echo json(array("code"=>213,"msg"=>"修改失败"));
+	}
+	$conn->close();
+}else if(isset($_GET['add_user'])){
+	$username = $data["username"];
+	$password = $data["password"];
+	$email = $data["email"];
+	$vipday = $data["vipday"];
+
+	if($data == null){
+		die(json(array("code"=>201,"msg"=>"非法请求")));
+	}else if($username == null){
+		die(json(array("code"=>202,"msg"=>"请输入账号")));
+	}else if($password == null){
+		die(json(array("code"=>203,"msg"=>"请输入密码")));
+	}else if($email == null){
+		die(json(array("code"=>204,"msg"=>"请输入邮箱")));
+	}else if($vipday == null){
+		die(json(array("code"=>205,"msg"=>"请输入会员天数")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$sql = "select * from app_user where username='{$username}'";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(!empty($row)){
+		$conn->close();
+		die(json(array("code"=>206,"msg"=>"账号已存在")));
+	}
+	$sql = "select * from app_user where email='{$email}'";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(!empty($row)){
+		$conn->close();
+		die(json(array("code"=>206,"msg"=>"邮箱已存在")));
+	}
+	$time = date('Y-m-d H:i:s');
+	$vip_day = date('Y-m-d H:i:s',time()+($vipday*86400));
+	$password = md5($password);
+	$sql = "INSERT INTO app_user (username,password,email,reg_time,expire_time) VALUES ('{$username}','{$password}','{$email}','{$time}','{$vip_day}')";
+	if($conn->query($sql)){
+		echo json(array("code"=>200,"msg"=>"添加成功"));
+	}else{
+		echo json(array("code"=>207,"msg"=>"添加失败"));
+	}
+	$conn->close();
+}else if(isset($_GET['modify_user_data'])){
+	$username = $data["username"];
+	$password = $data["password"];
+	$email = $data["email"];
+	$vipday = $data["vipday"];
+	$userid = $data["user_id"];
+
+	if($data == null){
+		die(json(array("code"=>201,"msg"=>"非法请求")));
+	}else if($username == null){
+		die(json(array("code"=>202,"msg"=>"请输入账号")));
+	}else if($password == null){
+		die(json(array("code"=>203,"msg"=>"请输入密码")));
+	}else if($email == null){
+		die(json(array("code"=>204,"msg"=>"请输入邮箱")));
+	}else if($vipday == null){
+		die(json(array("code"=>205,"msg"=>"请输入会员天数")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$sql = "select * from app_user where username='{$username}'";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(empty($row)){
+		$conn->close();
+		die(json(array("code"=>206,"msg"=>"账号不存在")));
+	}
+	$password = md5($password);
+	$sql = "UPDATE app_user SET username='{$username}',password='{$password}',email='{$email}',expire_time='{$vipday}' where id='{$userid}'";
+	if($conn->query($sql)){
+		echo json(array("code"=>200,"msg"=>"修改成功"));
+	}else{
+		echo json(array("code"=>207,"msg"=>"修改失败"));
+	}
+	$conn->close();
+}else if(isset($_GET["add_type"])){
+	$apptype = $data["app_type"];
+	if($apptype == null){
+		die(json(array("code"=>201,"msg"=>"请输入分类名称")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$sql = "select app_type from app_type where app_type='{$apptype}'";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	if(!empty($row)){
+		$conn->close();
+		die(json(array("code"=>202,"msg"=>"分类已存在")));
+	}
+	$sql = "insert into app_type (app_type) values ('{$apptype}');";
+	if($conn->query($sql)){
+		echo json(array("code"=>200,"msg"=>"添加成功"));
+	}else{
+		echo json(array("code"=>203,"msg"=>"添加失败"));
+	}
+	$conn->close();
+}else if(isset($_GET["delete_type"])){
+	$apptype = $data["app_type"];
+	if($apptype == null){
+		die(json(array("code"=>201,"msg"=>"请选择分类")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$sql = "select app_type from app_type where app_type='{$apptype}'";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(empty($row)){
+		$conn->close();
+		die(json(array("code"=>202,"msg"=>"分类不存在")));
+	}
+	$sql = "delete from app_type where app_type='{$apptype}';";
+	if($conn->query($sql)){
+		echo json(array("code"=>200,"msg"=>"删除成功"));
+	}else{
+		echo json(array("code"=>203,"msg"=>"删除失败"));
+	}
+	$conn->close();
+}else if(isset($_GET['apptjkm'])){
+
+  $value=$data['update_url'];
+  $number=$data['update_num'];
+ // $key=$_REQUEST['key'];
+ 
+ 	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+ 
+
+        if($number>50){
+
+          //echo json_encode($array);
+          echo json(array("code"=>201,"msg"=>"一次性添加不能大于50张卡密"));
+        }
+        else{
+
+                      //数组
+                      function randomkeys($length) 
+                      { 
+                         $pattern = '1234567890ZXCVBNMASDFGHJKLQWERTYUIOP';
+                         for($i=0;$i<$length;$i++) 
+                         { 
+                            $key .= $pattern{mt_rand(0,35)}; //生成php随机数 
+                         } 
+                         return $key; 
+                      }
+                      $kmsj=$appid.'km'; 
+                      //$data=date('Y-m-d H:i:s');
+                      //$data=date('Y-m-d',strtotime("+$value day"));
+                      $msg='创建'.$number.'张卡密成功';
+                      for($i=0;$i<$number;$i++){
+                         $kmcz='true';
+                         $km=randomkeys(16);
+
+                         $sqls="insert into app_kami (kami,cs,time) values ('$km','false','$value')";
+                         $fs = mysqli_query($conn, $sqls);
+                         $array=json_encode(array('dense'=>$km));
+                         $list = $array . ',' . $list;
+                      }
+                      $list1='['.substr($list,0,-1).']';
+                      $list2=json_decode($list1,true);
+
+                      //echo json_encode($datb);
+                           echo json(array("code"=>200,"msg"=>$msg));
+
+                    }
+
+ $conn->close();
+
+
+
+
+}else if(isset($_GET["add_announ"])){
+	$appannoun = $data["app_announ"];
+	$announstatus = $data["announ_status"];
+	if($appannoun == null){
+		die(json(array("code"=>201,"msg"=>"请输入公告内容")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+
+	$sql = "select app_announ,announ_status from app_data";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(empty($row)){
+		$sql = "insert into app_data (app_announ,announ_status) values ('{$appannoun}','{$announstatus}');";
+		if($conn->query($sql)){
+			echo json(array("code"=>200,"msg"=>"添加成功"));
+		}else{
+			echo json(array("code"=>202,"msg"=>"添加失败"));
+		}
+	}else{
+		$sql = "UPDATE app_data SET app_announ='{$appannoun}',announ_status='{$announstatus}'";
+		if($conn->query($sql)){
+			echo json(array("code"=>200,"msg"=>"修改成功"));
+		}else{
+			echo json(array("code"=>203,"msg"=>"修改失败"));
+		}
+	}
+	$conn->close();
+}else if(isset($_GET["app_update"])){
+	$updatenum = $data["update_num"];
+	$updateurl = $data["update_url"];
+	$updatemsg = $data["update_msg"];
+	$updatestatus = $data["update_status"];
+	if($updatenum == null){
+		die(json(array("code"=>201,"msg"=>"请输入版本号")));
+	}else if($updateurl == null){
+		die(json(array("code"=>202,"msg"=>"请输入下载链接")));
+	}else if($updatemsg == null){
+		die(json(array("code"=>203,"msg"=>"请输入更新内容")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$sql = "select update_num,update_url,update_msg,update_status from app_data";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(empty($row)){
+		$sql = "insert into app_data (update_num,update_url,update_msg,update_status) values ('{$updatenum}','{$updateurl}','{$updatemsg}','{$updatestatus}');";
+		if($conn->query($sql)){
+			echo json(array("code"=>200,"msg"=>"添加成功"));
+		}else{
+			echo json(array("code"=>204,"msg"=>"添加失败"));
+		}
+	}else{
+		$sql = "UPDATE app_data SET update_num='{$updatenum}',update_url='{$updateurl}',update_msg='{$updatemsg}',update_status='{$updatestatus}'";
+		if($conn->query($sql)){
+			echo json(array("code"=>200,"msg"=>"修改成功"));
+		}else{
+			echo json(array("code"=>205,"msg"=>"修改失败"));
+		}
+	}
+	$conn->close();
+}else if(isset($_GET["app_vip_config"])){
+	$oneviptitle = $data["one_vip_title"];
+	$onevipmoney = $data["one_vip_money"];
+	$onevipdays = $data["one_vip_days"];
+	$twoviptitle = $data["two_vip_title"];
+	$twovipmoney = $data["two_vip_money"];
+	$twovipdays = $data["two_vip_days"];
+	$threeviptitle = $data["three_vip_title"];
+	$threevipmoney = $data["three_vip_money"];
+	$threevipdays = $data["three_vip_days"];
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$sql = "select * from app_vip_config where package_num=1";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(empty($row)){
+		$sql = "insert into app_vip_config (package_num,package_title,package_money,package_days) values ('1','{$oneviptitle}','{$onevipmoney}','{$onevipdays}');";
+		$conn->query($sql);
+	}else{
+		$sql = "UPDATE app_vip_config SET package_title='{$oneviptitle}',package_money='{$onevipmoney}',package_days='{$onevipdays}' where package_num=1;";
+		$conn->query($sql);
+	}
+	$sql = "select * from app_vip_config where package_num=2";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(empty($row)){
+		$sql = "insert into app_vip_config (package_num,package_title,package_money,package_days) values ('2','{$twoviptitle}','{$twovipmoney}','{$twovipdays}');";
+		$conn->query($sql);
+	}else{
+		$sql = "UPDATE app_vip_config SET package_title='{$twoviptitle}',package_money='{$twovipmoney}',package_days='{$twovipdays}' where package_num=2;";
+		$conn->query($sql);
+	}
+	$sql = "select * from app_vip_config where package_num=3";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(empty($row)){
+		$sql = "insert into app_vip_config (package_num,package_title,package_money,package_days) values ('3','{$threeviptitle}','{$threevipmoney}','{$threevipdays}');";
+		$conn->query($sql);
+	}else{
+		$sql = "UPDATE app_vip_config SET package_title='{$threeviptitle}',package_money='{$threevipmoney}',package_days='{$threevipdays}' where package_num=3;";
+		$conn->query($sql);
+	}
+	echo json(array("code"=>200,"msg"=>"修改成功"));
+	$conn->close();
+}else if(isset($_GET["app_pay_config"])){
+	$qqpayurl = $data["qq_pay_url"];
+	$wxpayurl = $data["wx_pay_url"];
+	$zfbpayurl = $data["zfb_pay_url"];
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$sql = "select * from app_pay_config";
+	$res = $conn->query($sql);
+	$row = $res->fetch_assoc();
+	$res->free_result();
+	if(empty($row)){
+		$sql = "insert into app_pay_config (qq_pay_url,wx_pay_url,zfb_pay_url) values ('{$qqpayurl}','{$wxpayurl}','{$zfbpayurl}');";
+		if($conn->query($sql)){
+			echo json(array("code"=>200,"msg"=>"添加成功"));
+		}else{
+			echo json(array("code"=>201,"msg"=>"添加失败"));
+		}
+	}else{
+		$sql = "UPDATE app_pay_config SET qq_pay_url='{$qqpayurl}',wx_pay_url='{$wxpayurl}',zfb_pay_url='{$zfbpayurl}';";
+		if($conn->query($sql)){
+			echo json(array("code"=>200,"msg"=>"修改成功"));
+		}else{
+			echo json(array("code"=>201,"msg"=>"修改失败"));
+		}
+	}
+	$conn->close();
+}else if(isset($_GET["bill_msg"])){
+	$billid = $data["bill_id"];
+	$username = $data["username"];
+	$billstatus = $data["bill_status"];
+	$billmsg = $data["bill_msg"];
+	if($username == null){
+		die(json(array("code"=>201,"msg"=>"请输入账号")));
+	}else if($billstatus == null){
+		die(json(array("code"=>202,"msg"=>"请输入选择账单状态")));
+	}else if($billmsg == null){
+		die(json(array("code"=>203,"msg"=>"请输入返回内容")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	$time = date('Y-m-d H:i:s');
+	$sql = "insert into app_bill_msg (username,bill_type,bill_msg,bill_msg_status,bill_msg_time) values ('{$username}','{$billstatus}','{$billmsg}','0','{$time}');";
+	$sql .= "UPDATE app_bill SET pay_status='{$billstatus}',complete_time='{$time}' where id='{$billid}';";
+	if($billstatus == 1){
+		$sql1 = "select * from app_bill where id='{$billid}';";
+		$res = $conn->query($sql1);
+		$row = $res->fetch_assoc();
+		$res->free_result();
+		$sql1 = "select * from app_vip_config where package_num='{$row['package_num']}';";
+		$res = $conn->query($sql1);
+		$row1 = $res->fetch_assoc();
+		$res->free_result();
+		$sql1 = "select * from app_user where username='{$username}';";
+		$res = $conn->query($sql1);
+		$row = $res->fetch_assoc();
+		$res->free_result();
+		if(strtotime($row['expire_time']) < time()){
+			$vip_day = date('Y-m-d H:i:s',time()+($row1['package_days']*86400));
+		}else{
+			$expire_time = strtotime($row['expire_time']);
+			$vip_day = date('Y-m-d H:i:s',$expire_time+($row1['package_days']*86400));
+		}
+		$sql .= "UPDATE app_user SET expire_time='{$vip_day}' where username='{$username}';";
+	}
+	if($conn->multi_query($sql)){
+		echo json(array("code"=>200,"msg"=>"修改成功"));
+	}else{
+		echo json(array("code"=>204,"msg"=>"修改失败".$sql));
+	}
+	$conn->close();
+}else if(isset($_GET["delete_app"])){
+	$appids = $data["app_ids"];
+	if(empty($appids)){
+		die(json(array("code"=>201,"msg"=>"请输入应用id")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	for($i=0;$i<count($appids);$i++){
+		$sql = "select * from app_list where id='{$appids[$i]}';";
+		$res = $conn->query($sql);
+		$row = $res->fetch_assoc();
+		$res->free_result();
+		if(empty($row)){
+			$quidst[] = false;
+		}else if(!empty($row)){
+			$quidst[] = true;
+			$deleteids[] = $appids[$i];
+		}
+	}
+	if(!in_array(true,$quidst)){
+		$conn->close();
+		die(json(array("code"=>202,"msg"=>"应用不存在")));
+	}
+	for($i=0;$i<count($deleteids);$i++){
+		$sql = "delete from app_list where id='{$deleteids[$i]}';";
+		$conn->query($sql);
+	}
+	echo json(array("code"=>200,"msg"=>"删除成功"));
+	$conn->close();
+}else if(isset($_GET["delete_km"])){
+	$appids = $data["app_ids"];
+	if(empty($appids)){
+		die(json(array("code"=>201,"msg"=>"请输入卡密id")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	for($i=0;$i<count($appids);$i++){
+		$sql = "select * from app_kami where id='{$appids[$i]}';";
+		$res = $conn->query($sql);
+		$row = $res->fetch_assoc();
+		$res->free_result();
+		if(empty($row)){
+			$quidst[] = false;
+		}else if(!empty($row)){
+			$quidst[] = true;
+			$deleteids[] = $appids[$i];
+		}
+	}
+	if(!in_array(true,$quidst)){
+		$conn->close();
+		die(json(array("code"=>202,"msg"=>"卡密不存在")));
+	}
+	for($i=0;$i<count($deleteids);$i++){
+		$sql = "delete from app_kami where id='{$deleteids[$i]}';";
+		$conn->query($sql);
+	}
+	echo json(array("code"=>200,"msg"=>"删除成功"));
+	$conn->close();
+}else if(isset($_GET["delete_user"])){
+	$userids = $data["user_ids"];
+	if(empty($userids)){
+		die(json(array("code"=>201,"msg"=>"请输入用户id")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	for($i=0;$i<count($userids);$i++){
+		$sql = "select * from app_user where id='{$userids[$i]}';";
+		$res = $conn->query($sql);
+		$row = $res->fetch_assoc();
+		$res->free_result();
+		if(empty($row)){
+			$quidst[] = false;
+		}else if(!empty($row)){
+			$quidst[] = true;
+			$deleteids[] = $userids[$i];
+		}
+	}
+	if(!in_array(true,$quidst)){
+		$conn->close();
+		die(json(array("code"=>202,"msg"=>"用户不存在")));
+	}
+	for($i=0;$i<count($deleteids);$i++){
+		$sql = "delete from app_user where id='{$deleteids[$i]}';";
+		$conn->query($sql);
+	}
+	echo json(array("code"=>200,"msg"=>"删除成功"));
+	$conn->close();
+}else if(isset($_GET["delete_bill"])){
+	$billids = $data["bill_ids"];
+	if(empty($billids)){
+		die(json(array("code"=>201,"msg"=>"请输入账单id")));
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	for($i=0;$i<count($billids);$i++){
+		$sql = "select * from app_bill where id='{$billids[$i]}';";
+		$res = $conn->query($sql);
+		$row = $res->fetch_assoc();
+		$res->free_result();
+		if(empty($row)){
+			$quidst[] = false;
+		}else if(!empty($row)){
+			$quidst[] = true;
+			$deleteids[] = $billids[$i];
+		}
+	}
+	if(!in_array(true,$quidst)){
+		$conn->close();
+		die(json(array("code"=>202,"msg"=>"账单不存在")));
+	}
+	for($i=0;$i<count($deleteids);$i++){
+		$sql = "delete from app_bill where id='{$deleteids[$i]}';";
+		$conn->query($sql);
+	}
+	echo json(array("code"=>200,"msg"=>"删除成功"));
+	$conn->close();
+}else if(isset($_GET['modify_admin'])){
+	$username = $data["username"];
+	$password = $data["password"];
+	$passwords = $data["passwords"];
+
+	if($data == null){
+		die(json(array("code"=>201,"msg"=>"非法请求")));
+	}else if($username == null){
+		die(json(array("code"=>202,"msg"=>"请输入账号")));
+	}else if($password != null){
+		if($passwords == null){
+			die(json(array("code"=>203,"msg"=>"请再次输入密码")));
+		}else if($password != $passwords){
+			die(json(array("code"=>204,"msg"=>"两次密码不正确")));
+		}
+	}
+
+	$conn = new mysqli(DB_HOST,DB_USER,DB_PASSWD,DB_NAME);
+	if($conn->connect_error){
+		die("连接失败: ".$conn->connect_error);
+	}
+	if($password == null){
+		$sql = "select * from app_admin where username='{$username}';";
+		$res = $conn->query($sql);
+		$row = $res->fetch_assoc();
+		$res->free_result();
+		$password = $row['password'];
+	}else{
+		$password = md5($password);
+	}
+	$sql = "update app_admin set username='{$username}',password='{$password}';";
+	if($conn->query($sql)){
+		echo json(array("code"=>200,"msg"=>"修改成功"));
+	}else{
+		echo json(array("code"=>205,"msg"=>"修改失败"));
+	}
+	$conn->close();
+}else{
+	die(json(array("code"=>201,"msg"=>"系统错误")));
+}
+
+function json($data){
+	$json = json_encode($data,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	return $json;
+}
+
+
+
+// 在每个双引号（"）前添加反斜杠
+function daddslashes($string, $force = 0, $strip = FALSE){
+	!defined('MAGIC_QUOTES_GPC') && define('MAGIC_QUOTES_GPC', get_magic_quotes_gpc());
+	if(!MAGIC_QUOTES_GPC || $force){
+		if(is_array($string)){
+			foreach($string as $key => $val){
+				$string[$key] = daddslashes($val, $force, $strip);
+			}
+		}else{
+			$string = addslashes($strip ? stripslashes($string) : $string);
+		}
+	}
+	return $string;
+}

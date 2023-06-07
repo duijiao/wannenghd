@@ -1,0 +1,80 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+    background: linear-gradient(
+        45deg,
+        #9575cd,
+        #7986cb
+    );
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.back{
+    position: relative;
+    overflow: hidden;
+    width: 800px;
+    height: 500px;
+    background-color: rgba(255, 255,255, 0.2);
+    backdrop-filter: blur(20px);
+    display: flex;
+    border-radius: 15px;
+    margin: 0 20px;
+}
+.imgbox{
+    position: relative;
+    width: 400px;
+    height: 100%;
+}
+.imgbox img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.back form{
+    flex: 1 1 auto;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+.back form h2{
+    font-size: 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    color: #555;
+}
+.back form input{
+    width: 100%;
+    padding: 10px;
+    background-color: #f5f5f5;
+    color: #333;
+    border: none;
+    outline: none;
+    margin: 10px 0;
+    letter-spacing: 1px;
+    font-weight: 300;
+}
+.back form p{
+    padding: 10px 40px;
+    background-color: #677eff;
+    margin-top: 40px;
+    color: #fff;
+    max-width: 150px;
+}
+@media(max-width:790px){
+    .back{
+        max-width: 400px;
+    }
+    .back .imgbox{
+        display: none;
+    }
+    .back form{
+        padding: 40px 30px;
+    }
+}

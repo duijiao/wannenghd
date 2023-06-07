@@ -1,0 +1,37 @@
+.back .table{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex-direction: row;
+    padding: 10px;
+    height: auto;
+    margin-top: 80px;
+}
+.back .table .analytic{
+    flex: 1 1 200px;
+    border-radius: 10px;
+    background-color: rgba(237, 241, 244, 0.8);
+    display: flex;
+    padding: 15px 10px;
+    margin: 10px;
+}
+.back .table .analytic .analytic-ico i{
+    background-color: #e3f2fd;
+    border-radius: 50%;
+    color: #1376d2;
+    height: auto;
+    padding: 10px;
+    font-size: 12px;
+}
+.back .table .analytic .analytic-info{
+    flex: 1 1 auto;
+    margin-left: 10px;
+}
+.back .table .analytic .analytic-info span{
+    font-size: 18px;
+}
+.back .table .analytic .analytic-info h2{
+    color: #bdbdbd;
+    font-size: 18px;
+    margin-top: 5px;
+}

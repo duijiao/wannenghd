@@ -1,0 +1,27 @@
+.back .set{
+    margin-top: 80px;
+    display: flex;
+    padding: 20px;
+    height: auto;
+}
+.back .set .list{
+    margin: 10px;
+    flex: 1 1 200px;
+    background-color: rgba(237, 241, 244, 255);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+.back .set .list h2{
+    font-size: 18px;
+    font-weight: 600;
+}
+.back .set .list form p{
+    width: 100%;
+}
+@media(max-width:700px){
+    .back .set{
+        flex-direction: column;
+    }
+}
